@@ -2,28 +2,35 @@ import {useState, useEffect} from 'react';
 import Gallery from './Gallery';
 import ButtonBar from './ButtonBar';
 import './App.css';
+import { useSelector, useDispatch } from 'react-redux';
 
 function App() {
-let [artId, setArtId] = useState(12720)
-let [data, setData] = useState({})
-  useEffect(()=> {
-    document.title="Welcome to Artworld"
-    fetch(`https://collectionapi.metmuseum.org/public/collection/v1/objects/${artId}`)
-    .then(response => response.json())
-    .then(resData => setData(resData))
-  }, [artId])
+  const dispatch = useDispatch()
+  const data = useSelector((state) => state.data)
 
-  const handleIterate = (e) => {
-    setArtId(artId + Number(e.target.value))
-}
+  const renderImg = () => {
+    if(data.apiData) {
+      return <img style={{'width': '100vw'}} src={data.apiData.primaryImage} alt={data.apiData.title} />
+    } else {
+      return <p>image here</p>
+    }
+  }
+
   return (
     <div className="App">
-      <Gallery 
-      objectImg={data.primaryImage} 
-      artist={data.artistDisplayName} 
-      title={data.title} 
-      />
-      <ButtonBar handleIterate={handleIterate}/>
+      <div>
+        <button onClick={() => dispatch(fetchData())}>Thunk!</button>
+        <button onClick={() => dispatch(clearData())}>Clear</button>
+        <button onClick={() => dispatch(incrementId())}>Next</button>
+        <button onClick={() => dispatch(decrementId())}>Back</button>
+      </div>
+      <input value={ data.objectId } onChange={(e) => {
+        dispatch(inputId(Number(e.target.value)))
+      }} />
+      <div>
+        {data.objectId}
+        {renderImg()}
+      </div>
     </div>
   );
 }
